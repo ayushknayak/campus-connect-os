@@ -46,4 +46,31 @@ const getApplications = async (req, res) => {
     }
 };
 
-export {Addapplication,getApplications};
+const updateApplication=async(req,res)=>{
+    try {
+        const application=await Application.findOneAndUpdate(
+            {
+                _id: req.params.id,
+                userId: req.user.id
+            },
+            req.body,
+            {
+                returnDocument: "after"
+            }
+        );
+        if(!application){
+            return res.status(404).json({
+                message:"Application not found"
+            });
+        }
+        return res.status(201).json({
+            message:"Application Updated Succesfully",
+            application
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message:"Something went wrong"
+        });
+    }
+}
+export {Addapplication,getApplications,updateApplication};
