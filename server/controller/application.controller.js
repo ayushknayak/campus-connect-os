@@ -73,4 +73,27 @@ const updateApplication=async(req,res)=>{
         });
     }
 }
-export {Addapplication,getApplications,updateApplication};
+const deleteApplication = async (req, res) => {
+    try {
+        const application = await Application.findOneAndDelete({
+            _id: req.params.id,
+            userId: req.user.id
+        });
+
+        if (!application) {
+            return res.status(404).json({
+                message: "Application not found"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Application deleted successfully"
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Something went wrong"
+        });
+    }
+};
+export {Addapplication,getApplications,updateApplication,deleteApplication};
