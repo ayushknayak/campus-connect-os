@@ -29,5 +29,21 @@ const Addapplication=async(req,res)=>{
     }
 }
 
+const getApplications = async (req, res) => {
+    try {
+        const applications = await Application.find({
+            userId: req.user.id
+        });
 
-export default Addapplication;
+        return res.status(200).json({
+            applications
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Something went wrong"
+        });
+    }
+};
+
+export {Addapplication,getApplications};
