@@ -4,6 +4,7 @@ import dbconnect from './config/db.js';
 import authrouter from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import applicationRoutes from './routes/application.route.js';
+import opportunityRoutes from './routes/opportunities.route.js';
 dotenv.config()
 dbconnect()
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use('/api/auth',authrouter);
 app.use('/api/users', userRoutes);
 app.use('/api/applications',applicationRoutes);
+app.use('/api/opportunities',opportunityRoutes);
 
 const PORT=process.env.PORT;
 app.listen(PORT,()=>{
