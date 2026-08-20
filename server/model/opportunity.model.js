@@ -33,7 +33,15 @@ const opportunitySchema = new mongoose.Schema(
             type: String,
             required: true
         },
+        canonicalLink: {
+            type: String,
+            required: true,
+            unique: true
+        },
 
+        duplicateKey: {
+            type: String
+        },
         source: {
             type: String,
             enum: [
@@ -73,6 +81,6 @@ const opportunitySchema = new mongoose.Schema(
     }
 );
 
-const Opportunity = mongoose.model("Opportunity",opportunitySchema);
+const Opportunity = mongoose.model("Opportunity", opportunitySchema);
 
 export default Opportunity;
