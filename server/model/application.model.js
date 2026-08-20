@@ -39,7 +39,12 @@ const applicationSchema = new mongoose.Schema({
     },
     notes: {
         type: String
-    }
+    },
+    opportunityId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Opportunity",
+    default: null
+}
 
 }, {
     timestamps: true

@@ -1,52 +1,7 @@
 import Opportunity from "../model/opportunity.model.js";
+import { findOrCreateOpportunity,normalizeLink,createDuplicateKey, } from "../service/opportunity.service.js";
 
 
-const normalizeLink = (link) => {
-    const url = new URL(link);
-
-    const trackingParams = [
-        "utm_source",
-        "utm_medium",
-        "utm_campaign",
-        "utm_term",
-        "utm_content",
-        "source",
-        "ref"
-    ];
-
-    trackingParams.forEach((param) => {
-        url.searchParams.delete(param);
-    });
-
-    url.hash = "";
-
-    return url.toString().replace(/\/$/, "");
-};
-
-
-const createDuplicateKey = (
-    company,
-    title,
-    type,
-    location,
-    deadline
-) => {
-    return [
-        company,
-        title,
-        type,
-        location || "",
-        deadline || ""
-    ]
-        .map((value) =>
-            value
-                .toString()
-                .trim()
-                .toLowerCase()
-                .replace(/\s+/g, " ")
-        )
-        .join("|");
-};
 
 
 const addOpportunity = async (req, res) => {
@@ -65,64 +20,43 @@ const addOpportunity = async (req, res) => {
             confirmSimilarDuplicate
         } = req.body;
 
-        const canonicalLink = normalizeLink(applicationLink);
-
-        const duplicateKey = createDuplicateKey(
-            company,
-            title,
-            type,
-            location,
-            deadline
-        );
-
-        // Check exact duplicate
-        const existingOpportunity = await Opportunity.findOne({
-            canonicalLink
-        });
-
-        if (existingOpportunity) {
-            return res.status(409).json({
-                message: "This opportunity already exists",
-                isDuplicate: true,
-                opportunity: existingOpportunity
-            });
-        }
-
-        // Check similar opportunity
-        const similarOpportunity = await Opportunity.findOne({
-            duplicateKey
-        });
-
-        if (
-            similarOpportunity &&
-            !confirmSimilarDuplicate
-        ) {
-            return res.status(409).json({
-                message: "A similar opportunity already exists",
-                isSimilar: true,
-                opportunity: similarOpportunity
-            });
-        }
-
-        const opportunity = await Opportunity.create({
+        const result = await findOrCreateOpportunity({
             type,
             company,
             title,
             description,
             applicationLink,
-            canonicalLink,
-            duplicateKey,
             source,
             deadline,
             eligibility,
             location,
             skills,
-            contributedBy: req.user.id
+            contributedBy: req.user.id,
+            confirmSimilarDuplicate
         });
 
+        // Exact duplicate
+        if (result.type === "existing") {
+            return res.status(409).json({
+                message: "This opportunity already exists",
+                isDuplicate: true,
+                opportunity: result.opportunity
+            });
+        }
+
+        // Similar duplicate
+        if (result.type === "similar") {
+            return res.status(409).json({
+                message: "A similar opportunity already exists",
+                isSimilar: true,
+                opportunity: result.opportunity
+            });
+        }
+
+        // Successfully created
         return res.status(201).json({
             message: "Opportunity added successfully",
-            opportunity
+            opportunity: result.opportunity
         });
 
     } catch (error) {
