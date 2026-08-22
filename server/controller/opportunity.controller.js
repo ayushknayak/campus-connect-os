@@ -69,9 +69,80 @@ const addOpportunity = async (req, res) => {
 
 const getOpportunities = async (req, res) => {
     try {
-        const opportunities = await Opportunity.find();
+        const {
+            search,
+            type,
+            location,
+            sort,
+            page = 1,
+            limit = 10
+        } = req.query;
+
+        const filter = {};
+
+        if (search) {
+            filter.$or = [
+                {
+                    company: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                },
+                {
+                    title: {
+                        $regex: search,
+                        $options: "i"
+                    }
+                }
+            ];
+        }
+
+        if (type) {
+            filter.type = type;
+        }
+
+        if (location) {
+            filter.location = {
+                $regex: location,
+                $options: "i"
+            };
+        }
+
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        const skip = (pageNumber - 1) * limitNumber;
+
+        let sortOption = {
+            createdAt: -1
+        };
+
+        if (sort === "oldest") {
+            sortOption = {
+                createdAt: 1
+            };
+        }
+
+        if (sort === "deadline") {
+            sortOption = {
+                deadline: 1
+            };
+        }
+
+        const opportunities = await Opportunity.find(filter)
+            .sort(sortOption)
+            .skip(skip)
+            .limit(limitNumber);
+
+        const totalOpportunities =
+            await Opportunity.countDocuments(filter);
 
         return res.status(200).json({
+            totalOpportunities,
+            currentPage: pageNumber,
+            totalPages: Math.ceil(
+                totalOpportunities / limitNumber
+            ),
             opportunities
         });
 
