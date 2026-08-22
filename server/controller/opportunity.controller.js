@@ -72,7 +72,10 @@ const getOpportunities = async (req, res) => {
         const {
             search,
             type,
+            source,
             location,
+            skill,
+            status,
             sort,
             page = 1,
             limit = 10
@@ -80,6 +83,7 @@ const getOpportunities = async (req, res) => {
 
         const filter = {};
 
+        
         if (search) {
             filter.$or = [
                 {
@@ -93,6 +97,12 @@ const getOpportunities = async (req, res) => {
                         $regex: search,
                         $options: "i"
                     }
+                },
+                {
+                    description: {
+                        $regex: search,
+                        $options: "i"
+                    }
                 }
             ];
         }
@@ -101,6 +111,12 @@ const getOpportunities = async (req, res) => {
             filter.type = type;
         }
 
+    
+        if (source) {
+            filter.source = source;
+        }
+
+        
         if (location) {
             filter.location = {
                 $regex: location,
@@ -108,11 +124,34 @@ const getOpportunities = async (req, res) => {
             };
         }
 
-        const pageNumber = Number(page);
-        const limitNumber = Number(limit);
+    
+        if (skill) {
+            filter.skills = {
+                $regex: skill,
+                $options: "i"
+            };
+        }
 
-        const skip = (pageNumber - 1) * limitNumber;
+       
+        const currentDate = new Date();
 
+        if (status === "open") {
+            filter.deadline = {
+                $gte: currentDate
+            };
+        }
+
+        if (status === "expired") {
+            filter.deadline = {
+                $lt: currentDate
+            };
+        }
+
+        if (status === "unknown") {
+            filter.deadline = null;
+        }
+
+     
         let sortOption = {
             createdAt: -1
         };
@@ -129,11 +168,18 @@ const getOpportunities = async (req, res) => {
             };
         }
 
+      
+        const pageNumber = Number(page);
+        const limitNumber = Number(limit);
+
+        const skip = (pageNumber - 1) * limitNumber;
+
         const opportunities = await Opportunity.find(filter)
             .sort(sortOption)
             .skip(skip)
             .limit(limitNumber);
 
+     
         const totalOpportunities =
             await Opportunity.countDocuments(filter);
 

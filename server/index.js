@@ -6,6 +6,7 @@ import userRoutes from './routes/user.route.js';
 import applicationRoutes from './routes/application.route.js';
 import opportunityRoutes from './routes/opportunities.route.js';
 import experienceRoutes from './routes/experience.route.js';
+import dashboardRoutes from './routes/dashboard.route.js';
 dotenv.config()
 dbconnect()
 
@@ -18,6 +19,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/applications',applicationRoutes);
 app.use('/api/opportunities',opportunityRoutes);
 app.use('/api/experience',experienceRoutes);
+app.use('/api/dashboard',dashboardRoutes);
 
 const PORT=process.env.PORT;
 app.listen(PORT,()=>{
