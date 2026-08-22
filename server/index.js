@@ -5,6 +5,7 @@ import authrouter from './routes/auth.route.js';
 import userRoutes from './routes/user.route.js';
 import applicationRoutes from './routes/application.route.js';
 import opportunityRoutes from './routes/opportunities.route.js';
+import experienceRoutes from './routes/experience.route.js';
 dotenv.config()
 dbconnect()
 
@@ -16,6 +17,7 @@ app.use('/api/auth',authrouter);
 app.use('/api/users', userRoutes);
 app.use('/api/applications',applicationRoutes);
 app.use('/api/opportunities',opportunityRoutes);
+app.use('/api/experience',experienceRoutes);
 
 const PORT=process.env.PORT;
 app.listen(PORT,()=>{
