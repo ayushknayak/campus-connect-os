@@ -1,8 +1,8 @@
 import User from "../model/user.model.js";
 
-const getProfile=async(req,res)=>{
+const getProfile = async (req, res) => {
     try {
-         const user = await User.findById(req.user.id);
+        const user = await User.findById(req.user.id);
 
         if (!user) {
             return res.status(404).json({
@@ -10,36 +10,60 @@ const getProfile=async(req,res)=>{
             });
         }
 
-        return res.status(201).json({
-            message:'Profile Fetched Succesfully',
+        return res.status(200).json({
+            message: "Profile fetched successfully",
             user: {
                 id: user._id,
                 name: user.name,
                 email: user.email,
                 college: user.college,
                 branch: user.branch,
-                graduationYear: user.graduationYear
+                graduationYear: user.graduationYear,
+                cgpa: user.cgpa,
+                skills: user.skills,
+                username: user.username,
+                github: user.github,
+                linkedin: user.linkedin,
+                profileBio: user.profileBio,
+                isPublic: user.isPublic,
+                resume: user.resume
             }
         });
+
     } catch (error) {
-        return res.status(401).json({
-            message:'Something went wrong'
-        })
+        return res.status(500).json({
+            message: "Something went wrong"
+        });
     }
-}
+};
+
 
 const updateProfile = async (req, res) => {
     try {
-        const { cgpa, skills } = req.body;
+        const {
+            cgpa,
+            skills,
+            username,
+            github,
+            linkedin,
+            profileBio,
+            isPublic
+        } = req.body;
 
         const user = await User.findByIdAndUpdate(
             req.user.id,
             {
                 cgpa,
-                skills
+                skills,
+                username,
+                github,
+                linkedin,
+                profileBio,
+                isPublic
             },
             {
-                new: true
+                new: true,
+                runValidators: true
             }
         );
 
@@ -59,7 +83,13 @@ const updateProfile = async (req, res) => {
                 branch: user.branch,
                 graduationYear: user.graduationYear,
                 cgpa: user.cgpa,
-                skills: user.skills
+                skills: user.skills,
+                username: user.username,
+                github: user.github,
+                linkedin: user.linkedin,
+                profileBio: user.profileBio,
+                isPublic: user.isPublic,
+                resume: user.resume
             }
         });
 
@@ -70,4 +100,42 @@ const updateProfile = async (req, res) => {
     }
 };
 
-export  {getProfile,updateProfile};
+const getPublicProfile = async (req, res) => {
+    try {
+        const { username } = req.params;
+
+        const user = await User.findOne({
+            username: username,
+            isPublic: true
+        });
+
+        if (!user) {
+            return res.status(404).json({
+                message: "Public profile not found"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Public profile fetched successfully",
+            user: {
+                username: user.username,
+                name: user.name,
+                college: user.college,
+                branch: user.branch,
+                graduationYear: user.graduationYear,
+                cgpa: user.cgpa,
+                skills: user.skills,
+                github: user.github,
+                linkedin: user.linkedin,
+                profileBio: user.profileBio
+            }
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: "Something went wrong"
+        });
+    }
+};
+
+export { getProfile, updateProfile ,getPublicProfile};
