@@ -4,7 +4,7 @@ import { findOrCreateOpportunity } from '../service/opportunity.service.js';
 
 const shareApplicationAsOpportunity = async (req, res) => {
     try {
-        // Find application and verify ownership
+       
         const application = await Application.findOne({
             _id: req.params.id,
             userId: req.user.id
@@ -16,7 +16,7 @@ const shareApplicationAsOpportunity = async (req, res) => {
             });
         }
 
-        // Already linked?
+      
         if (application.opportunityId) {
             return res.status(400).json({
                 message:
@@ -50,7 +50,7 @@ const shareApplicationAsOpportunity = async (req, res) => {
             confirmSimilarDuplicate
         });
 
-        // Similar opportunity found
+     
         if (result.type === "similar") {
             return res.status(409).json({
                 message: "A similar opportunity already exists",
@@ -59,12 +59,11 @@ const shareApplicationAsOpportunity = async (req, res) => {
             });
         }
 
-        // Existing or newly created opportunity
+       
         application.opportunityId = result.opportunity._id;
 
         await application.save();
 
-        // Exact match already existed
         if (result.type === "existing") {
             return res.status(200).json({
                 message:
@@ -74,7 +73,7 @@ const shareApplicationAsOpportunity = async (req, res) => {
             });
         }
 
-        // New opportunity was created
+       
         return res.status(201).json({
             message:
                 "Application shared and opportunity created successfully",
